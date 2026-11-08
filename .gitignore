@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# База данных и данные приложения
+*.db
+*.db-wal
+*.db-shm
+data/
+
+# Сборка PyInstaller (генерируется build.bat)
+build/
+dist/
+*.spec
+
+# Редакторы / ОС
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
