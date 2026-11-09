@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeTracker — канбан-тайм-трекер команды</title>
+<meta name="description" content="Локальный тайм-трекер для Windows: канбан-доска, карточки задач, интервалы работы, профиль команды, отчёты и две темы оформления. Без авторизации.">
+<style>
+  :root {
+    --blue: #2f6fb2;
+    --blue-dark: #245a94;
+    --blue-light: #dceafa;
+    --amber: #f0a202;
+    --green: #1e7d48;
+    --red: #c0392b;
+    --ink: #243046;
+    --muted: #5b6b82;
+    --bg: #f4f6fa;
+    --panel: #ffffff;
+    --border: #dbe2ec;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  a { color: var(--blue); }
+
+  /* ---------- шапка ---------- */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    max-width: 1080px; margin: 0 auto; padding: 14px 20px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .logo { font-weight: 800; font-size: 19px; color: var(--ink); text-decoration: none; }
+  .logo span { color: var(--blue); }
+  .nav .links { margin-left: auto; display: flex; gap: 20px; flex-wrap: wrap; }
+  .nav .links a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 15px; }
+  .nav .links a:hover { color: var(--blue); }
+
+  /* ---------- кнопки ---------- */
+  .btn {
+    display: inline-block; padding: 12px 26px; border-radius: 10px;
+    font-weight: 700; font-size: 16px; text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: var(--blue); color: #fff;
+    box-shadow: 0 6px 18px rgba(47,111,178,.35);
+  }
+  .btn-primary:hover { background: var(--blue-dark); color: #fff; }
+  .btn-ghost {
+    background: #fff; color: var(--ink); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    max-width: 1080px; margin: 0 auto; padding: 72px 20px 40px;
+    text-align: center;
+  }
+  .hero .badge {
+    display: inline-block; background: var(--blue-light); color: var(--blue-dark);
+    font-weight: 700; font-size: 14px; padding: 6px 16px; border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 54px); line-height: 1.15; letter-spacing: -.5px;
+    margin-bottom: 18px;
+  }
+  .hero h1 em { font-style: normal; color: var(--blue); }
+  .hero p.lead {
+    font-size: 19px; color: var(--muted); max-width: 720px; margin: 0 auto 32px;
+  }
+  .hero .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- скриншоты ---------- */
+  .shots {
+    max-width: 1080px; margin: 30px auto 0; padding: 0 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  .shot {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 14px 34px rgba(36,48,70,.10);
+  }
+  .shot img { width: 100%; display: block; }
+  .shot figcaption {
+    padding: 10px 16px; font-size: 14px; font-weight: 600; color: var(--muted);
+    border-top: 1px solid var(--border); text-align: center;
+  }
+  .shot .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  @media (max-width: 760px) { .shots { grid-template-columns: 1fr; } }
+
+  /* ---------- секции ---------- */
+  section { max-width: 1080px; margin: 0 auto; padding: 56px 20px; }
+  h2 { font-size: 32px; text-align: center; margin-bottom: 8px; letter-spacing: -.4px; }
+  .sub { text-align: center; color: var(--muted); font-size: 17px; margin-bottom: 36px; }
+
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px 22px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(36,48,70,.10); }
+  .card .icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 14px;
+  }
+  .card h3 { font-size: 17px; margin-bottom: 8px; }
+  .card p { font-size: 15px; color: var(--muted); }
+  .i-blue   { background: var(--blue-light); }
+  .i-amber  { background: #fff3d6; }
+  .i-green  { background: #e3f5ec; }
+  .i-red    { background: #fbe6e3; }
+
+  /* ---------- стек / как начать ---------- */
+  .steps {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 34px 30px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px;
+  }
+  .step .num {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+  .step h3 { font-size: 16px; margin-bottom: 6px; }
+  .step p { font-size: 14.5px; color: var(--muted); }
+  code, pre {
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 14px;
+    background: #eef2f8; border-radius: 6px;
+  }
+  code { padding: 2px 6px; }
+  pre {
+    padding: 14px 16px; overflow-x: auto; color: var(--ink);
+    border: 1px solid var(--border); margin-top: 8px;
+  }
+
+  .stack { text-align: center; }
+  .chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .chip {
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 8px 18px; border-radius: 999px; font-weight: 600; font-size: 15px;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; text-align: center; border-radius: 18px;
+    padding: 52px 24px; margin-top: 20px;
+  }
+  .cta h2 { color: #fff; }
+  .cta p { color: #d7e6f8; font-size: 17px; margin: 10px auto 26px; max-width: 620px; }
+  .cta .btn-primary { background: var(--amber); color: #243046; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .cta .btn-primary:hover { background: #ffb524; color: #243046; }
+  .cta .btn-ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.55); }
+  .cta .btn-ghost:hover { border-color: #fff; color: #fff; }
+
+  /* ---------- подвал ---------- */
+  footer {
+    border-top: 1px solid var(--border); margin-top: 60px;
+    padding: 26px 20px; text-align: center; color: var(--muted); font-size: 14.5px;
+  }
+  footer a { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <a class="logo" href="#">Time<span>Tracker</span></a>
+    <div class="links">
+      <a href="#features">Возможности</a>
+      <a href="#screens">Скриншоты</a>
+      <a href="#start">Как начать</a>
+      <a href="https://github.com/lazyness680-gif/TimeTracker" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="badge">MVP · без авторизации · portable</div>
+  <h1>Канбан-тайм-трекер<br>для <em>команды</em></h1>
+  <p class="lead">
+    Локальное приложение для Windows: задачи на доске, живые таймеры,
+    интервалы работы, профиль команды и отчёты за период.
+    Перетащил карточку — таймер пошёл.
+  </p>
+  <div class="actions">
+    <a class="btn btn-primary" href="https://github.com/lazyness680-gif/TimeTracker/releases" target="_blank" rel="noopener">Скачать с GitHub</a>
+    <a class="btn btn-ghost" href="#features">Узнать больше</a>
+  </div>
+</section>
+
+<div class="shots" id="screens">
+  <figure class="shot">
+    <img src="screenshot-light.png" alt="TimeTracker — светлая тема: канбан-доска с карточками задач" loading="lazy">
+    <figcaption><span class="dot" style="background:#2f6fb2"></span>Светлая тема</figcaption>
+  </figure>
+  <figure class="shot">
+    <img src="screenshot-dark.png" alt="TimeTracker — тёмная тема: канбан-доска с карточками задач" loading="lazy">
+    <figcaption><span class="dot" style="background:#1b1f2a"></span>Тёмная тема</figcaption>
+  </figure>
+</div>
+
+<section id="features">
+  <h2>Возможности</h2>
+  <p class="sub">Всё, что нужно команде, чтобы видеть, на что уходит время</p>
+  <div class="features">
+    <div class="card">
+      <div class="icon i-blue">🗂</div>
+      <h3>Канбан-доска</h3>
+      <p>Колонки «Новая / В работе / Завершена». Перетаскивание карточки запускает и останавливает таймер — статус всегда выводится из интервалов.</p>
+    </div>
+    <div class="card">
+      <div class="icon i-amber">🃏</div>
+      <h3>Карточки задач</h3>
+      <p>Приоритет, видимость (личные/общие), суммарное и личное время, кто работает прямо сейчас и живой таймер.</p>
+    </div>
+    <div class="card">
+      <div class="icon i-green">⏱</div>
+      <h3>Интервалы</h3>
+      <p>Несколько задач одновременно, подтверждение завершения с длительностью, heartbeat-восстановление после выключения ПК.</p>
+    </div>
+    <div class="card">
+      <div class="icon i-blue">👥</div>
+      <h3>Профиль команды</h3>
+      <p>Название команды, участники без паролей (добавить, переименовать, удалить) и статистика времени за период.</p>
+    </div>
+    <div class="card">
+      <div class="icon i-amber">📊</div>
+      <h3>Отчёты и записи</h3>
+      <p>Отчёт по всем участникам за период и «Мои записи» — свои записи с фильтрами по датам и задаче.</p>
+    </div>
+    <div class="card">
+      <div class="icon i-green">🎨</div>
+      <h3>Две темы</h3>
+      <p>Светлая и тёмная с переключателем в шапке. Палитра: синий, янтарь, зелёный и красный для высокого приоритета.</p>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <h2>Как начать</h2>
+  <p class="sub">Три шага — и таймеры поехали</p>
+  <div class="steps">
+    <div class="step">
+      <div class="num">1</div>
+      <h3>Скачайте</h3>
+      <p>Готовую portable-версию из <a href="https://github.com/lazyness680-gif/TimeTracker/releases" target="_blank" rel="noopener">Releases</a> или клонируйте репозиторий.</p>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <h3>Запустите</h3>
+      <p>Распакуйте папку и запустите <code>TimeTracker.exe</code> — установщик и права администратора не нужны.</p>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <h3>Создайте команду</h3>
+      <p>При первом запуске приложение попросит название команды и участников — дальше просто ведите задачи на доске.</p>
+    </div>
+  </div>
+  <pre>git clone https://github.com/lazyness680-gif/TimeTracker.git
+cd TimeTracker
+pip install -r TimeTracker/requirements.txt
+python TimeTracker/main.py</pre>
+</section>
+
+<section class="stack">
+  <h2>Стек</h2>
+  <p class="sub">Простой и надёжный</p>
+  <div class="chips">
+    <span class="chip">Python 3.11+</span>
+    <span class="chip">PySide6 (Qt6)</span>
+    <span class="chip">SQLite (WAL)</span>
+    <span class="chip">PyInstaller</span>
+    <span class="chip">20 приёмочных тестов</span>
+  </div>
+</section>
+
+<section>
+  <div class="cta">
+    <h2>Попробуйте TimeTracker</h2>
+    <p>Открытый исходный код на GitHub: задачи, таймеры, отчёты и две темы — без регистрации и авторизации.</p>
+    <div class="actions" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-primary" href="https://github.com/lazyness680-gif/TimeTracker" target="_blank" rel="noopener">Открыть GitHub</a>
+      <a class="btn btn-ghost" href="https://github.com/lazyness680-gif/TimeTracker/blob/main/TimeTracker/README.md" target="_blank" rel="noopener">Документация</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  TimeTracker — локальный канбан-тайм-трекер ·
+  <a href="https://github.com/lazyness680-gif/TimeTracker" target="_blank" rel="noopener">github.com/lazyness680-gif/TimeTracker</a>
+</footer>
+
+</body>
+</html>
