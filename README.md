@@ -8,6 +8,8 @@
 
 🌐 **Сайт проекта:** [трекерзерокод3.рф](https://xn--3-gtbcaaltd9abodcu.xn--p1ai/)
 
+[![Скриншот лендинга TimeTracker](docs/landing-hero.jpg)](https://xn--3-gtbcaaltd9abodcu.xn--p1ai/)
+
 ## Возможности
 
 - 🗂 **Канбан-доска** — колонки «Новая / В работе / Завершена»; перетаскивание
