@@ -203,10 +203,18 @@ python deploy\ssh_exec.py cmd "cp /etc/nginx/sites-available/timetracker.bak /et
 
 ## 5. Архив для офлайн-передачи
 
-Создать zip с исходниками (без `.git`, сборок и секретов):
+Готовый комплект лежит в `dist\Передача-клиенту\`:
+
+| Файл | Что это |
+|---|---|
+| `TimeTracker-handover.zip` | исходники проекта (без `.git`, сборок и секретов) |
+| `TimeTracker-1.0.0-win64.zip` | portable-сборка приложения |
+| `ИНСТРУКЦИЯ-ПО-ДЕПЛОЮ.md` | копия этого документа |
+
+Пересоздать архив исходников:
 
 ```powershell
-git archive --format=zip --output=dist\TimeTracker-handover.zip HEAD
+git archive --format=zip --output="dist\Передача-клиенту\TimeTracker-handover.zip" HEAD
 ```
 
 В архив попадают только файлы из репозитория. Пароль сервера в архив
